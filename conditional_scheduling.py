@@ -10,7 +10,7 @@ from datetime import datetime
         )
 def asset_1():
 
-    return ['metadata']
+    return ['metadata 1']
 
 @asset(
         schedule="@daily",
@@ -19,7 +19,7 @@ def asset_1():
         )
 def asset_2():
 
-    return ['metadata']
+    return ['metadata 2']
 
 
 # --- Consumer: triggers when EITHER asset updates ---
@@ -35,12 +35,14 @@ def any_consumer():
                 print(dedent(f"""
                 f"Asset: {asset.uri}"
                 Source DAG: {event.source_dag_id}
+                Source Task: {event.source_task_id}
                 Event Timestamp: {event.timestamp}
                 """)
                 )
                 metadata = ti.xcom_pull(
                     dag_id=event.source_dag_id,
-                    task_id=event.source_task_id
+                    task_ids=event.source_task_id,
+                    run_id=event.source_run_id,
                 )
                 print(f'Metadata: {metadata}')
 
@@ -61,13 +63,18 @@ def all_consumer():
                 print(dedent(f"""
                 f"Asset: {asset.uri}"
                 Source DAG: {event.source_dag_id}
+                Source Task: {event.source_task_id}
                 Event Timestamp: {event.timestamp}
+                
                 """)
                 )
                 metadata = ti.xcom_pull(
                     dag_id=event.source_dag_id,
-                    task_id=event.source_task_id
+                    task_ids=event.source_task_id,
+                    run_id=event.source_run_id,
                 )
                 print(f'Metadata: {metadata}')
 
     handle_all()
+
+any_consumer(), all_consumer()
